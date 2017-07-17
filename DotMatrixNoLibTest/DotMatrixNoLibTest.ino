@@ -227,11 +227,12 @@ const byte font[128][8] PROGMEM = {
   }
 
   void writeToDisplay(){
-    for(int dispCounter=0; dispCounter<nDisp+1; dispCounter++){
-      for(int columCounter=8; columCounter>0; columCounter--){
+    for(int columCounter=0; columCounter<8; columCounter++)
+      for(int dispCounter=0; dispCounter<nDisp+1; dispCounter ++){
+      { 
         digitalWrite(loadPin, LOW);
-        shiftOut(dataPin, clockPin, MSBFIRST, 8-dispCounter);
-        shiftOut(dataPin,clockPin, MSBFIRST, framebuffer[(nDisp+1)-dispCounter + (nDisp*columCounter)]);
+        shiftOut(dataPin, clockPin, MSBFIRST, 8-columnCounter);
+        shiftOut(dataPin,clockPin, MSBFIRST, framebuffer[dispCounter+(columCounter*(nDisp+1))]);
       }
       digitalWrite(loadPin, HIGH);
 
