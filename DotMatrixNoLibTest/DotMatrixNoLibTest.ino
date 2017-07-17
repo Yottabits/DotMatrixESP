@@ -16,7 +16,7 @@
 byte framebuffer[(8*nDisp)+8];
 
 const byte font[128][8] PROGMEM = {
-  { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0000 (nul)
+  { 0b00010000, 0b00010000, 0b00101000, 0b00101000, 0b00010000, 0b00010000, 0xFF, 0xFF},   // U+0000 (nul)
   { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0001
   { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0002
   { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0003
@@ -212,7 +212,7 @@ const byte font[128][8] PROGMEM = {
 
   void scrollLeft(){
     for(int i=0;i<8*nDisp+8;i++){
-      framebuffer[i] = (framebuffer[i] >> 1) + (framebuffer[i+8] << 7);
+      framebuffer[i] = (framebuffer[i] << 1) + (framebuffer[i+1] >> 7);
     }
   }
 
@@ -227,15 +227,13 @@ const byte font[128][8] PROGMEM = {
   }
 
   void writeToDisplay(){
-    for(int columCounter=0; columCounter<8; columCounter++)
-      for(int dispCounter=0; dispCounter<nDisp+1; dispCounter ++){
-      { 
-        digitalWrite(loadPin, LOW);
-        shiftOut(dataPin, clockPin, MSBFIRST, 8-columnCounter);
-        shiftOut(dataPin,clockPin, MSBFIRST, framebuffer[dispCounter+(columCounter*(nDisp+1))]);
+    for(int columCounter=0; columCounter<=8; columCounter++){
+      digitalWrite(loadPin, LOW);
+      for(int dispCounter=0; dispCounter<nDisp+1; dispCounter++){
+        shiftOut(dataPin, clockPin, MSBFIRST, columCounter);
+        shiftOut(dataPin,clockPin, MSBFIRST, framebuffer[dispCounter-1+(columCounter*nDisp)]);
       }
       digitalWrite(loadPin, HIGH);
-
     }
 
   }
@@ -244,8 +242,9 @@ const byte font[128][8] PROGMEM = {
     if(textLength > nDisp){
       for(int j=0;j<textLength;j++){
         for (size_t i = 0; i < nDisp+1; i++) {
-          //scrollLeft();
+          // scrollLeft();
           writeToDisplay();
+          //test
         }
         drawChar(pgm_read_byte(text + j),nDisp);
       }
@@ -253,9 +252,10 @@ const byte font[128][8] PROGMEM = {
   }
 
 
-  const char theText[] PROGMEM = "1         ";
+  const char theText[] PROGMEM = {"Apfelsaft"};
 
 
   void loop() {
     drawText(theText, sizeof(theText));
+
   }
